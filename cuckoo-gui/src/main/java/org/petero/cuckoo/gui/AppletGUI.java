@@ -21,6 +21,7 @@ package org.petero.cuckoo.gui;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import org.petero.cuckoo.engine.chess.ChessParseError;
 import org.petero.cuckoo.engine.chess.ComputerPlayer;
 import org.petero.cuckoo.engine.chess.Move;
 import org.petero.cuckoo.engine.chess.Position;
@@ -93,6 +94,9 @@ public class AppletGUI extends javax.swing.JApplet implements GUIInterface {
         StatusLine = new javax.swing.JTextField();
         Forward = new javax.swing.JButton();
         Backward = new javax.swing.JButton();
+
+        fenInputTextField = new javax.swing.JTextField();
+        javax.swing.JLabel fenInputLabel = new javax.swing.JLabel("FEN");
 
         ChessBoardPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         ChessBoardPanel.setPreferredSize(new java.awt.Dimension(500, 500));
@@ -221,7 +225,9 @@ public class AppletGUI extends javax.swing.JApplet implements GUIInterface {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
-                    .addComponent(StatusLine, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
+                        .addComponent(fenInputLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
+                        .addComponent(fenInputTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
+                        .addComponent(StatusLine, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addGroup(jPanel1Layout.createSequentialGroup()
                             .addComponent(NewGame)
@@ -232,11 +238,14 @@ public class AppletGUI extends javax.swing.JApplet implements GUIInterface {
                         .addComponent(SettingsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
+
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(SettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(fenInputLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(fenInputTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(NewGame)
                     .addComponent(Forward)
@@ -283,9 +292,11 @@ public class AppletGUI extends javax.swing.JApplet implements GUIInterface {
     private void ChessBoardMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ChessBoardMousePressed
         if (ctrl.humansTurn()) {
             int sq = cbp.eventToSquare(evt);
-            Move m = cbp.mousePressed(sq);
-            if (m != null) {
-                ctrl.humanMove(m);
+            if (sq >=0 && sq < 64) {
+                Move m = cbp.mousePressed(sq);
+                if (m != null) {
+                    ctrl.humanMove(m);
+                }
             }
         }
     }//GEN-LAST:event_ChessBoardMousePressed
@@ -295,7 +306,17 @@ public class AppletGUI extends javax.swing.JApplet implements GUIInterface {
     }//GEN-LAST:event_FlipBoardStateChanged
 
     private void NewGameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_NewGameActionPerformed
+        System.out.println("NewGameActionPerformed: " + fenInputTextField.getText());
+        System.out.println(fenInputTextField.getText());
         ctrl.newGame(PlayerWhite.isSelected(), ttLogSize, true);
+        if (fenInputTextField.getText() != null && fenInputTextField.getText().length() > 0) {
+            try {
+                System.out.println("setFENOrPGN");
+                ctrl.setFENOrPGN(fenInputTextField.getText());
+            } catch (ChessParseError chessParseError) {
+                chessParseError.printStackTrace();
+            }
+        }
         ctrl.startGame();
     }//GEN-LAST:event_NewGameActionPerformed
 
@@ -350,6 +371,9 @@ public class AppletGUI extends javax.swing.JApplet implements GUIInterface {
     private javax.swing.JSlider TimeSlider;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+
+    private javax.swing.JTextField fenInputTextField;
+
     // End of variables declaration//GEN-END:variables
 
     @Override
